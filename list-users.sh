@@ -9,7 +9,7 @@
 ###########
 
 # calling help function
-help()
+help "$@"
 
 # GitHub API URL
 API_URL="https://api.github.com"
@@ -49,10 +49,12 @@ function list_users_with_read_access {
 }
 
 function help {
-  cmd-args = 2
-  if [ $# -ne $cmd-args ]; then
+  cmd = 2
+  if [ $# -ne $cmd ]; then
   echo "Please re-check the cmd line args "
   echo " format of the cmd ars -> ./filename org-name repo-name"
+  exit 1
+  fi
 }
 
 # Main script
