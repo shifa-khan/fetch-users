@@ -8,20 +8,28 @@
 # export="token"
 ###########
 
-# calling help function
-help "$@"
+# Help function
+function print_help {
+  if [ $# -eq 0 ]; then
+    echo "Please provide two arguments: organization name and repository name."
+    echo "Usage: ./script.sh org-name repo-name"
+    exit 1
+  fi
+}
+
+# Call the help function
+print_help "$@"
 
 # GitHub API URL
 API_URL="https://api.github.com"
 
-
 # GitHub username and personal access token
-USERNAME=$username
-TOKEN=$token
+USERNAME="$username"
+TOKEN="$token"
 
 # User and Repository information
-REPO_OWNER=$1
-REPO_NAME=$2
+REPO_OWNER="$1"
+REPO_NAME="$2"
 
 # Function to make a GET request to the GitHub API
 function github_api_get {
@@ -37,7 +45,20 @@ function list_users_with_read_access {
     local endpoint="repos/${REPO_OWNER}/${REPO_NAME}/collaborators"
 
     # Fetch the list of collaborators on the repository
-    collaborators="$(github_api_get "$endpoint" | jq -r '.[] | select(.permissions.pull == true) | .login')"
+    response=$(github_api_get "$endpoint")
+    if [ $? -ne 0 ]; then
+        echo "Error fetching collaborators."
+        exit 1
+    fi
+
+    # Check if the response is empty or not in expected format
+    if [ -z "$response" ] || [ "$(echo "$response" | jq '.message')" != "null" ]; then
+        echo "Error: Unable to fetch collaborators. Please check if the repository exists and you have permissions."
+        exit 1
+    fi
+
+    # Parse the response to get the list of collaborators with read access
+    collaborators=$(echo "$response" | jq -r '.[].login')
 
     # Display the list of collaborators with read access
     if [[ -z "$collaborators" ]]; then
@@ -47,16 +68,6 @@ function list_users_with_read_access {
         echo "$collaborators"
     fi
 }
-
-# Help function
-function help {
-  if [ $# -eq 0 ]; then
-    echo "Please provide two arguments: organization name and repository name."
-    echo "Usage: ./script.sh org-name repo-name"
-    exit 1
-  fi
-}
-
 
 # Main script
 
