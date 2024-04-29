@@ -48,14 +48,15 @@ function list_users_with_read_access {
     fi
 }
 
+# Help function
 function help {
-  cmd = 2
-  if [ $# -ne $cmd ]; then
-  echo "Please re-check the cmd line args "
-  echo " format of the cmd ars -> ./filename org-name repo-name"
-  exit 1
+  if [ $# -eq 0 ]; then
+    echo "Please provide two arguments: organization name and repository name."
+    echo "Usage: ./script.sh org-name repo-name"
+    exit 1
   fi
 }
+
 
 # Main script
 
